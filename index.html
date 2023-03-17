@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Event Attendance</title>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+</head>
+<body>
+  <div id="events"></div>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyCTVf7UuZYlMfiRRdF3aOZlipVgGwWntsM",
+      authDomain: "acdcboybasketball.firebaseapp.com",
+      databaseURL: "https://acdcboybasketball-default-rtdb.firebaseio.com",
+      projectId: "acdcboybasketball",
+      storageBucket: "acdcboybasketball.appspot.com",
+      messagingSenderId: "488795731492",
+      appId: "1:488795731492:web:4d20b1644c27f85388cab1"
+    };
+
+    // Initialize Firebase
+    const firebaseApp = firebase.initializeApp(firebaseConfig);
+    const database = firebaseApp.database();
+
+    const events = [
+      { name: "U16 Spring Jam Sioux Falls", date: "April 22-23" },
+      { name: "USF Team Sioux Falls", date: "June 17-18" },
+      { name: "U16 Summer Classic Sioux Falls", date: "July 21-23" },
+      { name: "Hardknockers Rapid City", date: "July 28-29" }
+    ];
+
+    const attendees = [
+      "Sabas", "Hunter", "Anaias", "Peter", "Garth", "Ryder", "Tyson", "Jamian", "Ethan", "Isaiah", "AJ", "Ty", "Justin", "Koda", "Tate", "Kashton"
+    ];
+
+    function updateAttendance(eventIndex, attendeeIndex, attending) {
+      const eventRef = database.ref(`events/${eventIndex}/${attendeeIndex}`);
+      eventRef.set(attending);
+    }
+
+    function renderEvents() {
+      const eventsDiv = document.getElementById('events');
+      eventsDiv.innerHTML = '';
+
+      events.forEach((event, eventIndex) => {
+        const eventDiv = document.createElement('div');
+        eventDiv.innerHTML = `<h2>${event.name} (${event.date})</h2>`;
+        const attendeeList = document.createElement('ul');
+
+        attendees.forEach((attendee, attendeeIndex) => {
+          const attendeeItem = document.createElement('li');
+          attendeeItem.textContent = attendee;
+          const attendingCheckbox = document.createElement('input');
+          attendingCheckbox.type = 'checkbox';
+          attendingCheckbox.addEventListener('change', () => {
+            updateAttendance(eventIndex, attendeeIndex, attendingCheckbox.checked);
+          });
+
+          const eventRef = database.ref(`events/${eventIndex}/${attendeeIndex}`);
+          eventRef.on('value', (snapshot) => {
+            attendingCheckbox.checked = snapshot.val() || false;
+          });
+
+          attendeeItem.appendChild(attendingCheckbox);
+          attendeeList.appendChild(attendeeItem);
+        });
+
+        eventDiv.appendChild(attendeeList);
+        eventsDiv.appendChild(eventDiv);
+      });
+    }
+
+    renderEvents();
+  </script>
+</body>
+</html>
