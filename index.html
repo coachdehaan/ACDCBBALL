@@ -20,10 +20,12 @@
     background-color: #f2f2f2;
   }
  .sticky {
-    position: sticky;
-    top: 0;
-    background-color: white;
-  }
+  position: sticky;
+  top: 0;
+  background-color: white;
+  z-index: 1; /* Add this line to ensure the sticky header is displayed above the table content */
+}
+
 
   /* Mobile styles */
   @media (max-width: 767px) {
@@ -94,7 +96,7 @@ events.forEach((event) => {
   const attendeeRow = document.createElement("tr");
   const attendeeName = document.createElement("td");
   attendeeName.textContent = attendee;
-  attendeeName.classList.add("sticky");
+ 
   attendeeRow.appendChild(attendeeName);
   attendeeRow.classList.add("event-row");
 
