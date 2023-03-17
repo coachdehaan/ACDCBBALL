@@ -7,7 +7,45 @@
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
 <style>
-  table {
+ /* Add this new class */
+.event-name {
+  font-weight: bold;
+}
+
+/* Update the mobile styles */
+@media (max-width: 767px) {
+  table, thead, tbody, th, td, tr {
+    display: block;
+  }
+
+  thead tr {
+    position: absolute;
+    top: -9999px;
+    left: -9999px;
+  }
+
+  tr {
+    margin-bottom: 1rem;
+  }
+
+  td {
+    border: none;
+    position: relative;
+    padding-left: 50%;
+  }
+
+  td:before {
+    content: attr(data-label);
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    font-weight: bold;
+  }
+}
+ 
+
+table {
     border-collapse: collapse;
     width: 100%;
   }
@@ -96,6 +134,8 @@ events.forEach((event) => {
   const attendeeRow = document.createElement("tr");
   const attendeeName = document.createElement("td");
   attendeeName.textContent = attendee;
+attendeeName.setAttribute("data-label", "Name");
+
  
   attendeeRow.appendChild(attendeeName);
   attendeeRow.classList.add("event-row");
