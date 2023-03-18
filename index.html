@@ -94,7 +94,15 @@ body {
     eventSelection.appendChild(select);
   }
 
-  function renderAttendeeList(eventIndex) {
+  function addCheckmark(parentElement) {
+  const checkmark = document.createElement("span");
+  checkmark.textContent = "✓";
+  checkmark.style.color = "green";
+  checkmark.style.marginLeft = "5px";
+  parentElement.appendChild(checkmark);
+}
+
+function renderAttendeeList(eventIndex) {
   const attendeeList = document.getElementById("attendee-list");
   attendeeList.innerHTML = "";
 
@@ -112,6 +120,9 @@ body {
     attendeeCheckbox.classList.add("attendee-checkbox");
     attendeeCheckbox.addEventListener("change", (event) => {
       updateAttendance(eventIndex, attendeeIndex, event.target.checked);
+      if (event.target.checked) {
+        addCheckmark(attendeeDiv);
+      }
     });
     attendeeDiv.appendChild(attendeeCheckbox);
 
@@ -119,11 +130,15 @@ body {
     const eventRef = database.ref(`events/${eventIndex}/${attendeeIndex}`);
     eventRef.on("value", (snapshot) => {
       attendeeCheckbox.checked = snapshot.val() || false;
+      if (attendeeCheckbox.checked) {
+        addCheckmark(attendeeDiv);
+      }
     });
 
     attendeeList.appendChild(attendeeDiv);
   });
 }
+
 
 
   renderEventSelection();
