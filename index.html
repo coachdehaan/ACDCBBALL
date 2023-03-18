@@ -7,6 +7,56 @@
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
 <style>
+/* Add these styles */
+.event-name {
+  font-weight: bold;
+}
+
+.mobile-sticky {
+  position: -webkit-sticky;
+  position: sticky;
+  top: 0;
+  background-color: white;
+  z-index: 1;
+}
+
+/* Update the mobile styles */
+@media (max-width: 767px) {
+  table, thead, tbody, th, td, tr {
+    display: block;
+  }
+
+  thead tr {
+    position: absolute;
+    top: -9999px;
+    left: -9999px;
+  }
+
+  tr {
+    margin-bottom: 1rem;
+  }
+
+  td {
+    border: none;
+    position: relative;
+    padding-left: 50%;
+  }
+
+  td:before {
+    content: attr(data-label);
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    font-weight: bold;
+    width: 45%; /* Add this line to set a width for the label */
+    overflow: hidden; /* Add this line to prevent the label from overflowing */
+    text-overflow: ellipsis; /* Add this line to truncate the label with an ellipsis if it's too long */
+  }
+}
+
+
+
 .event-name {
   font-weight: bold;
 }
