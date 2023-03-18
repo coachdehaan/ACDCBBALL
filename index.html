@@ -54,11 +54,11 @@ body {
   const database = firebaseApp.database();
 
   const events = [
-  { name: "U16 Spring Jam Sioux Falls", date: "April 22-23", deadline: "2023-04-20 23:59" },
-  { name: "USF Team Sioux Falls", date: "June 17-18", deadline: "2023-06-15 23:59" },
-  { name: "U16 Summer Classic Sioux Falls", date: "July 21-23", deadline: "2023-07-19 23:59" },
-  { name: "Hardknockers Rapid City", date: "July 28-29", deadline: "2023-07-26 23:59" }
-];
+    { name: "U16 Spring Jam Sioux Falls", date: "April 22-23", deadline: "2023-04-20 23:59" },
+    { name: "USF Team Sioux Falls", date: "June 17-18", deadline: "2023-06-15 23:59" },
+    { name: "U16 Summer Classic Sioux Falls", date: "July 21-23", deadline: "2023-07-19 23:59" },
+    { name: "Hardknockers Rapid City", date: "July 28-29", deadline: "2023-07-26 23:59" }
+  ];
 
   const attendees = [
     "Sabas", "Hunter", "Anaias", "Peter", "Garth", "Ryder", "Tyson", "Jamian", "Ethan", "Isaiah", "AJ", "Ty", "Justin", "Koda", "Tate", "Kashton"
@@ -70,14 +70,7 @@ body {
   }
 
   function renderEventSelection() {
-   const deadlineText = document.createElement("p");
-  eventSelection.appendChild(deadlineText);
-
-  select.addEventListener("change", () => {
-    renderAttendeeList(select.selectedIndex);
-    deadlineText.textContent = `Deadline: ${events[select.selectedIndex].deadline}`;
-  }); 
-const eventSelection = document.getElementById("event-selection");
+    const eventSelection = document.getElementById("event-selection");
     eventSelection.innerHTML = "";
 
     const select = document.createElement("select");
@@ -90,7 +83,6 @@ const eventSelection = document.getElementById("event-selection");
     defaultOption.disabled = true;
     defaultOption.selected = true;
     select.appendChild(defaultOption);
-
     events.forEach((event, index) => {
       const option = document.createElement("option");
       option.textContent = `${event.name} (${event.date})`;
@@ -99,44 +91,50 @@ const eventSelection = document.getElementById("event-selection");
     });
 
     eventSelection.appendChild(select);
+
+    const deadlineText = document.createElement("p");
+    eventSelection.appendChild(deadlineText);
+
+    select.addEventListener("change", () => {
+      deadlineText.textContent = `Deadline: ${events[select.selectedIndex].deadline}`;
+    });
   }
 
   function renderAttendeeList(eventIndex) {
-  const attendeeList = document.getElementById("attendee-list");
-  attendeeList.innerHTML = "";
+    const attendeeList = document.getElementById("attendee-list");
+    attendeeList.innerHTML = "";
 
-  attendees.forEach((attendee, attendeeIndex) => {
-   const deadline = new Date(events[eventIndex].deadline);
-  const now = new Date();
+    const deadline = new Date(events[eventIndex].deadline);
+    const now = new Date();
 
-  attendees.forEach((attendee, attendeeIndex) => { 
-checkbox.disabled = now > deadline;
-const attendeeDiv = document.createElement("div");
-    attendeeDiv.classList.add("attendee");
+    attendees.forEach((attendee, attendeeIndex) => {
+      const attendeeDiv = document.createElement("div");
+      attendeeDiv.classList.add("attendee");
 
-    const attendeeName = document.createElement("span");
-    attendeeName.classList.add("attendee-name");
-    attendeeName.textContent = attendee;
-    attendeeDiv.appendChild(attendeeName);
+      const attendeeName = document.createElement("span");
+      attendeeName.classList.add("attendee-name");
+      attendeeName.textContent = attendee;
+      attendeeDiv.appendChild(attendeeName);
 
-    const attendeeCheckbox = document.createElement("input");
-    attendeeCheckbox.type = "checkbox";
-    attendeeCheckbox.classList.add("attendee-checkbox");
-    attendeeCheckbox.addEventListener("change", (event) => {
-      updateAttendance(eventIndex, attendeeIndex, event.target.checked);
+      const attendeeCheckbox = document.createElement("input");
+      attendeeCheckbox.type = "checkbox";
+      attendeeCheckbox.classList.add("attendee-checkbox");
+      attendeeCheckbox.addEventListener("change", (event) => {
+        updateAttendance(eventIndex, attendeeIndex, event.target.checked);
+      });
+      attendeeDiv.appendChild(attendeeCheckbox);
+
+      // Load saved attendance information from Firebase
+      const eventRef = database.ref(`events/${eventIndex}/${attendeeIndex}`);
+      eventRef.on("value", (snapshot) => {
+        attendeeCheckbox.checked = snapshot.val() || false;
+      });
+
+      attendeeCheckbox.disabled = now > deadline;
+
+      attendeeList.appendChild(attendeeDiv);
     });
-    attendeeDiv.appendChild(attendeeCheckbox);
-
-    // Load saved attendance information from Firebase
-    const eventRef = database.ref(`events/${eventIndex}/${attendeeIndex}`);
-    eventRef.on("value", (snapshot) => {
-      attendeeCheckbox.checked = snapshot.val() || false;
-    });
-
-    attendeeList.appendChild(attendeeDiv);
-  });
-}
-
+  }
 
   renderEventSelection();
 
