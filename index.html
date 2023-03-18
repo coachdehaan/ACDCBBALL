@@ -19,8 +19,6 @@
     </style>
   </head>
   <body>
-    <button id="submit-button">Submit Answers</button>
-
     <div id="team-selection">
       <button id="red-team">Red Team</button>
       <button id="blue-team">Blue Team</button>
@@ -63,25 +61,14 @@
   }
 ];
 
-      
-const firebaseConfig = {
-  apiKey: "AIzaSyC6toyds2tLzyfiINLUXgPeEgSDU2WhwkI",
-  authDomain: "worksheet-9f4d8.firebaseapp.com",
-  databaseURL: "https://worksheet-9f4d8-default-rtdb.firebaseio.com",
-  projectId: "worksheet-9f4d8",
-  storageBucket: "worksheet-9f4d8.appspot.com",
-  messagingSenderId: "223669808651",
-  appId: "1:223669808651:web:7faa06a79f4a187262210e"
-};
+      const firebaseConfig = {
+        // Add your firebase configuration here
+      };
 
       const app = initializeApp(firebaseConfig);
       const db = getDatabase(app);
       const selectionRef = ref(db, "selection");
       const scoresRef = ref(db, "scores");
-      const scores = {
-  red: 0,
-  blue: 0
-};
 
       // Team selection logic
       const redTeamButton = document.getElementById("red-team");
@@ -94,54 +81,64 @@ const firebaseConfig = {
       let selectedStudent = null;
 
       redTeamButton.addEventListener("click", () => {
-        if (selectedStudent) {
-          set(ref(db, `students/${selectedStudent}/team`), "red");
-          redTeamButton.classList.add("selected");
-          blueTeamButton.classList.remove("selected");
-        }
+  if (selectedStudent) {
+    set(ref(db, `students/${selectedStudent}/team`), "red")
+      .then(() => {
+        console.log(`Selected team for ${selectedStudent}: red`);
+      })
+      .catch((error) => {
+        console.error(`Error selecting red team for ${selectedStudent}:`, error);
       });
+    redTeamButton.classList.add("selected");
+    blueTeamButton.classList.remove("selected");
+  }
+});
 
-      blueTeamButton.addEventListener("click", () => {
-        if (selectedStudent) {
-          set(ref(db, `students/${selectedStudent}/team`), "blue");
-          blueTeamButton.classList.add("selected");
-          redTeamButton.classList.remove("selected");
-        }
+blueTeamButton.addEventListener("click", () => {
+  if (selectedStudent) {
+    set(ref(db, `students/${selectedStudent}/team`), "blue")
+      .then(() => {
+        console.log(`Selected team for ${selectedStudent}: blue`);
+      })
+      .catch((error) => {
+        console.error(`Error selecting blue team for ${selectedStudent}:`, error);
       });
+    blueTeamButton.classList.add("selected");
+    redTeamButton.classList.remove("selected");
+  }
+});
 
-      studentNameSelect.addEventListener("change", (event) => {
-        selectedStudent = event.target.value;
+studentNameSelect.addEventListener("change", (event) => {
+  selectedStudent = event.target.value;
 
-        if (selectedStudent) {
-          onValue(ref(db, `students/${selectedStudent}/team`), (snapshot) => {
-            const team = snapshot.val();
-            selectedTeam = team;
-            redTeamButton.classList.toggle("selected", team === "red");
-            blueTeamButton.classList.toggle("selected", team === "blue");
-          });
-        }
-      });
+  if (selectedStudent) {
+    onValue(ref(db, `students/${selectedStudent}/team`), (snapshot) => {
+      const team = snapshot.val();
+      selectedTeam = team;
+      redTeamButton.classList.toggle("selected", team === "red");
+      blueTeamButton.classList.toggle("selected", team === "blue");
+    });
+  }
+});
+questions.forEach((question, index) => {
+  const questionElement = document.createElement("div");
+  questionElement.innerHTML = `
+    <p>${question.question}</p>
+    <select data-correct-answer="${question.correctAnswer}" data-question-index="${index}">
+      <option value="">Select answer</option>
+      ${question.wordBank
+        .map(
+          (answer) =>
+            `<option value="${answer}">${answer}</option>`
+        )
+        .join("")}
+    </select>
+    <button class="answer-button">Submit Answer</button>
+  `;
+  worksheetDiv.appendChild(questionElement);
+});
 
-      // Worksheet logic
-      questions.forEach((question, index) => {
-        const questionElement = document.createElement("div");
-        questionElement.innerHTML = `
-          <p>${question.question}</p>
-          <select data-correct-answer="${question.correctAnswer}" data-question-index="${index}">
-            <option value="">Select answer</option>
-            ${question.wordBank
-              .map(
-                (answer) =>
-                  `<option value="${answer}">${answer}</option>`
-              )
-              .join("")}
-          </select>
-          <button class="answer-button">Submit Answer</button>
-        `;
-        worksheetDiv.appendChild(questionElement);
-      });
-
-      worksheetDiv.addEventListener("click", (event) => {
+worksheetDiv.addEventListener("click", (event) => {
   if (!event.target.classList.contains("answer-button")) return;
   const selectElement = event.target.previousSibling;
   const correctAnswer = selectElement.dataset.correctAnswer;
@@ -157,86 +154,20 @@ const firebaseConfig = {
   } else {
     event.target.style.backgroundColor = "grey";
   }
-});
-
-
-      // Save score to Firebase
-      function saveScore(questionIndex) {
-  if (!selectedStudent || !selectedTeam) return;
-
-  const studentRef = ref(scoresRef, `${selectedStudent}/${selectedTeam}`);
-  const questionRef = ref(studentRef, `${questionIndex}`);
-
-  set(questionRef, true);
-
-  // Calculate and update team score
-  if (selectedTeam === "red") {
-    scores.red += 1;
-    document.getElementById("red-score").textContent = scores.red;
-  } else {
-    scores.blue += 1;
-    document.getElementById("blue-score").textContent = scores.blue;
+  
+  // Disable the submit button after clicking
+  event.target.disabled = true;
+  event.target.classList.add("answered");
+  selectElement.disabled = true;
+  
+  // Highlight the correct and incorrect answers
+  const options = selectElement.options;
+  for (let i = 0; i < options.length; i++) {
+    const option = options[i];
+    if (option.value === correctAnswer) {
+      option.classList.add("correct-answer");
+    } else if (option.value === selectedAnswer) {
+      option.classList.add("wrong-answer");
+    }
   }
-}
-
-
-
-      // Load individual and team scores from Firebase
-     
-      onValue(scoresRef, (snapshot) => {
-  const data = snapshot.val();
-  if (!data) return;
-
-  const individualScoresList = document.getElementById(
-    "individual-scores"
-  );
-  individualScoresList.innerHTML = "";
-  Object.entries(data).forEach(([student, scores]) => {
-    const studentScoreElement = document.createElement("li");
-    studentScoreElement.innerHTML = `${student}: ${Object.values(
-      scores
-    ).filter(Boolean).length} / ${questions.length}`;
-    individualScoresList.appendChild(studentScoreElement);
-  });
 });
-
-
-        // Update individual scores
-        const scores = {
-  red: 0,
-  blue: 0
-};
-const submitButton = document.getElementById("submit-button");
-
-        
-        const individualScoresList = document.getElementById(
-          "individual-scores"
-        );
-        individualScoresList.innerHTML = "";
-        Object.entries(data).forEach(([student, scores]) => {
-          const studentScoreElement = document.createElement("li");
-          studentScoreElement.innerHTML = `${student}: ${Object.values(
-            scores
-          ).filter(Boolean).length} / ${questions.length}`;
-          individualScoresList.appendChild(studentScoreElement);
-        });
-
-        // Update team scores
-        scores.red = Object.values(data)
-          .map((scores) => scores.red)
-          .filter(Boolean).length;
-        scores.blue = Object.values(data)
-          .map((scores) => scores.blue)
-          .filter(Boolean).length;
-        document.getElementById("red-score").textContent = scores.red;
-        document.getElementById("blue-score").textContent = scores.blue;
-      });
-    </script>
-    <script>let scores = { red: 0, blue: 0 };
-    </script>
-    <script>submitButton.addEventListener("click", () => {
-        // TODO: Add logic to calculate total scores and update Firebase
-      });
-      </script>
-  </body>
-</html>
