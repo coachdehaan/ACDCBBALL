@@ -34,38 +34,11 @@ body {
 .attendee-checkbox {
   margin-left: 10px;
 }
-@import url('https://fonts.googleapis.com/css2?family=Bungee+Shade&display=swap');
 
-.header {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  font-family: 'Bungee Shade', cursive;
-  font-size: 2.5rem;
-  margin-bottom: 1rem;
-  text-transform: uppercase;
-}
-
-.lightning-bolt {
-  width: 2.5rem;
-  margin: 0 0.5rem;
-}
-
-.lightning-bolts {
-  display: flex;
-}
 </style>
 </head>
 <body>
-<div class="header">
-  <div class="lightning-bolts">
-    <img class="lightning-bolt" src="https://www.svgrepo.com/show/305144/lightning-bolt.svg" alt="Lightning bolt">
-    <span>ACDC Thunder Boys Basketball</span>
-    <img class="lightning-bolt" src="https://www.svgrepo.com/show/305144/lightning-bolt.svg" alt="Lightning bolt">
-  </div>
-  <audio id="thunder-sound" src="https://www.zapsplat.com/wp-content/uploads/2015/sound-effects-68268/zapsplat_nature_thunder_crack_very_close_007_70217.mp3?_=1"></audio>
-</div>
-
+  <h1>⚡ Thunder Boys Basketball ⚡</h1> 
   <div id="event-selection"></div>
   <div id="attendee-list"></div>
 <script>
@@ -155,21 +128,6 @@ body {
   });
 }
 
-// Play thunder sound on page load
-const thunderSound = document.getElementById("thunder-sound");
-thunderSound.volume = 0.3;
-thunderSound.play();
-
-// Play thunder sound when a checkbox is clicked
-function playThunderSound() {
-  thunderSound.currentTime = 0;
-  thunderSound.play();
-}
-
-attendeeCheckbox.addEventListener("change", (event) => {
-  updateAttendance(eventIndex, attendeeIndex, event.target.checked);
-  playThunderSound();
-});
 
   renderEventSelection();
 
