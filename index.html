@@ -7,247 +7,157 @@
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
 <style>
-/* Add these styles */
-.event-name {
-  font-weight: bold;
-}
-
-.mobile-sticky {
-  position: -webkit-sticky;
-  position: sticky;
-  top: 0;
-  background-color: white;
-  z-index: 1;
-}
-
-/* Update the mobile styles */
-@media (max-width: 767px) {
-  table, thead, tbody, th, td, tr {
-    display: block;
-  }
-
-  thead tr {
-    position: absolute;
-    top: -9999px;
-    left: -9999px;
-  }
-
-  tr {
-    margin-bottom: 1rem;
-  }
-
-  td {
-    border: none;
-    position: relative;
-    padding-left: 50%;
-  }
-
-  td:before {
-    content: attr(data-label);
-    position: absolute;
-    left: 0;
-    top: 50%;
-    transform: translateY(-50%);
-    font-weight: bold;
-    width: 45%; /* Add this line to set a width for the label */
-    overflow: hidden; /* Add this line to prevent the label from overflowing */
-    text-overflow: ellipsis; /* Add this line to truncate the label with an ellipsis if it's too long */
-  }
-}
-
-
-
-.event-name {
-  font-weight: bold;
-}
-
-.mobile-sticky {
-  position: -webkit-sticky;
-  position: sticky;
-  top: 0;
-  background-color: white;
-  z-index: 1;
-}
-
-.event-name {
-  font-weight: bold;
-}
-
-@media (max-width: 767px) {
-  table, thead, tbody, th, td, tr {
-    display: block;
-  }
-
-  thead tr {
-    position: absolute;
-    top: -9999px;
-    left: -9999px;
-  }
-
-  tr {
-    margin-bottom: 1rem;
-  }
-
-  td {
-    border: none;
-    position: relative;
-    padding-left: 50%;
-  }
-
-  td:before {
-    content: attr(data-label);
-    position: absolute;
-    left: 0;
-    top: 50%;
-    transform: translateY(-50%);
-    font-weight: bold;
-  }
-}
-
-table {
-    border-collapse: collapse;
-    width: 100%;
-}
-th, td {
-    border: 1px solid black;
-    padding: 8px;
-    text-align: left;
-}
-th {
-    background-color: #f2f2f2;
-}
-.sticky {
-  position: sticky;
-  top: 0;
-  background-color: white;
-  z-index: 1;
-}
-
-@media (max-width: 767px) {
-    .event-row {
-      display: block;
+    table {
+      border-collapse: collapse;
+      width: 100%;
     }
-}
+    th, td {
+      border: 1px solid black;
+      padding: 8px;
+      text-align: left;
+    }
+    th {
+      background-color: #f2f2f2;
+    }
+    .sticky {
+      position: sticky;
+      top: 0;
+      background-color: white;
+      z-index: 1;
+    }
+    @media (max-width: 767px) {
+      table {
+        display: block;
+        position: relative;
+      }
+      thead, tbody, th, td, tr {
+        display: block;
+      }
+      thead tr {
+        position: fixed;
+        top: 0;
+        background-color: white;
+        width: 100%;
+        z-index: 1;
+      }
+      th {
+        display: inline-block;
+        width: 100%;
+      }
+      tbody {
+        margin-top: 2rem;
+      }
+      tr {
+        margin-bottom: 1rem;
+      }
+      td {
+        border: none;
+        position: relative;
+        display: inline-block;
+        width: 100%;
+      }
+      td:before {
+        content: attr(data-label);
+        position: absolute;
+        left: 0;
+        top: 50%;
+        transform: translateY(-50%);
+        font-weight: bold;
+        width: 45%;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+    }
 </style>
 </head>
 <body>
   <div id="events"></div>
-<script>
-  const firebaseConfig = {
-    apiKey: "AIzaSyCTVf7UuZYlMfiRRdF3aOZlipVgGwWntsM",
-    authDomain: "acdcboybasketball.firebaseapp.com",
-    databaseURL: "https://acdcboybasketball-default-rtdb.firebaseio.com",
-    projectId: "acdcboybasketball",
-    storageBucket: "acdcboybasketball.appspot.com",
-    messagingSenderId: "488795731492",
-    appId: "1:488795731492:web:4d20b1644c27f85388cab1"
-  };
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyCTVf7UuZYlMfiRRdF3aOZlipVgGwWntsM",
+      authDomain: "acdcboybasketball.firebaseapp.com",
+      databaseURL: "https://acdcboybasketball-default-rtdb.firebaseio.com",
+      projectId: "acdcboybasketball",
+      storageBucket: "acdcboybasketball.appspot.com",
+      messagingSenderId: "488795731492",
+      appId: "1:488795731492:web:4d20b1644c27f85388cab1"
+    };
 
-  const firebaseApp = firebase.initializeApp(firebaseConfig);
-  const database = firebaseApp.database();
+    const firebaseApp = firebase.initializeApp(firebaseConfig);
+    const database = firebaseApp.database();
 
-  const events = [
-    { name: "U16 Spring Jam Sioux Falls", date: "April 22-23" },
-    { name: "USF Team Sioux Falls", date: "June 17-18" },
-    { name: "U16 Summer Classic Sioux Falls", date: "July 21-23" },
-    { name: "Hardknockers Rapid City", date: "July 28-29" }
-  ];
+    const events = [
+      { name: "U16 Spring Jam Sioux Falls", date: "April 22-23" },
+      { name: "USF Team Sioux Falls", date: "June 17-18" },
+      { name: "U16 Summer Classic Sioux Falls", date: "July 21-23" },
+      { name: "Hardknockers Rapid City", date: "July 28-29" }
+    ];
 
-  const attendees = [
-    "Sabas", "Hunter", "Anaias", "Peter", "Garth", "Ryder", "Tyson", "Jamian", "Ethan", "Isaiah", "AJ", "Ty", "Justin", "Koda", "Tate", "Kashton"
-  ];
+        const attendees = [
+      "Sabas", "Hunter", "Anaias", "Peter", "Garth", "Ryder", "Tyson", "Jamian", "Ethan", "Isaiah", "AJ", "Ty", "Justin", "Koda", "Tate", "Kashton"
+    ];
 
-  function updateAttendance(eventIndex, attendeeIndex, attending) {
-    const eventRef = database.ref(`events/${eventIndex}/${attendeeIndex}`);
-    eventRef.set(attending);
-  }
-
-  function renderEvents() {
-    const eventsDiv = document.getElementById("events");
-    eventsDiv.innerHTML = "";
-
-    const table = document.createElement("table");
-    const thead = document.createElement("thead");
-    const headerRow = document.createElement("tr");
-    const nameHeader = document.createElement("th");
-    nameHeader.textContent = "Name";
-    nameHeader.classList.add("sticky");
-    headerRow.appendChild(nameHeader);
-
-    events.forEach((event) => {
-      const eventHeader = document.createElement("th");
-      eventHeader.textContent = `${event.name} (${event.date})`;
-      eventHeader.classList.add("sticky");
-      headerRow.appendChild(eventHeader);
-    });
-
-    thead.appendChild(headerRow);
-    table.appendChild(thead);
-
-    attendees.forEach((attendee, attendeeIndex) => {
-      const attendeeRow = document.createElement("tr");
-      const attendeeName = document.createElement("td");
-      attendeeName.textContent = attendee;
-      attendeeName.setAttribute("data-label", "Name");
-      attendeeRow.appendChild(attendeeName);
-      attendeeRow.classList.add("event-row");
-
-      events.forEach((event, eventIndex) => {
-        const attendeeEvent = document.createElement("td");
-        const attendingCheckbox = document.createElement("input");
-        attendingCheckbox.type = "checkbox";
-        attendingCheckbox.addEventListener("change", () => {
-          updateAttendance(eventIndex, attendeeIndex, attendingCheckbox.checked);
-        });
-
-        const eventRef = database.ref(`events/${eventIndex}/${attendeeIndex}`);
-        eventRef.on("value", (snapshot) => {
-          attendingCheckbox.checked = snapshot.val() || false;
-        });
-
-        attendeeEvent.appendChild(attendingCheckbox);
-        attendeeEvent.setAttribute("data-label", `${event.name} (${event.date})`);
-        attendeeRow.appendChild(attendeeEvent);
-      });
-
-      table.appendChild(attendeeRow);
-    });
-
-    eventsDiv.appendChild(table);
-
-    function handleMobileSticky() {
-      const rows = document.querySelectorAll(".event-row");
- const header = document.querySelector("thead");
-
-      if (window.innerWidth <= 767) {
-        rows.forEach((row, index) => {
-          const firstCell = row.querySelector("td:first-child");
-          const isScrolledPast = firstCell.getBoundingClientRect().top <= 0;
-
-          if (isScrolledPast) {
-            header.innerHTML = firstCell.innerHTML;
-            header.classList.add("mobile-sticky");
-          }
-
-          if (index < rows.length - 1) {
-            const nextFirstCell = rows[index + 1].querySelector("td:first-child");
-            const isNextScrolled = nextFirstCell.getBoundingClientRect().top <= 0;
-
-            if (isNextScrolled) {
-              header.innerHTML = nextFirstCell.innerHTML;
-            }
-          }
-        });
-      } else {
-        header.classList.remove("mobile-sticky");
-      }
+    function updateAttendance(eventIndex, attendeeIndex, attending) {
+      const eventRef = database.ref(`events/${eventIndex}/${attendeeIndex}`);
+      eventRef.set(attending);
     }
 
-    window.addEventListener("scroll", handleMobileSticky);
-    window.addEventListener("resize", handleMobileSticky);
-  }
+    function renderEvents() {
+      const eventsDiv = document.getElementById("events");
+      eventsDiv.innerHTML = "";
 
-  renderEvents();
-</script>
+      const table = document.createElement("table");
+      const thead = document.createElement("thead");
+      const headerRow = document.createElement("tr");
+      const nameHeader = document.createElement("th");
+      nameHeader.textContent = "Name";
+      nameHeader.classList.add("sticky");
+      headerRow.appendChild(nameHeader);
+
+      events.forEach((event) => {
+        const eventHeader = document.createElement("th");
+        eventHeader.textContent = `${event.name} (${event.date})`;
+        eventHeader.classList.add("sticky");
+        headerRow.appendChild(eventHeader);
+      });
+
+      thead.appendChild(headerRow);
+      table.appendChild(thead);
+
+      attendees.forEach((attendee, attendeeIndex) => {
+        const attendeeRow = document.createElement("tr");
+        const attendeeName = document.createElement("td");
+        attendeeName.textContent = attendee;
+        attendeeName.setAttribute("data-label", "Name");
+        attendeeRow.appendChild(attendeeName);
+
+        events.forEach((event, eventIndex) => {
+          const attendeeEvent = document.createElement("td");
+          const attendingCheckbox = document.createElement("input");
+          attendingCheckbox.type = "checkbox";
+          attendingCheckbox.addEventListener("change", () => {
+            updateAttendance(eventIndex, attendeeIndex, attendingCheckbox.checked);
+          });
+
+          const eventRef = database.ref(`events/${eventIndex}/${attendeeIndex}`);
+          eventRef.on("value", (snapshot) => {
+            attendingCheckbox.checked = snapshot.val() || false;
+          });
+
+          attendeeEvent.appendChild(attendingCheckbox);
+          attendeeEvent.setAttribute("data-label", `${event.name} (${event.date})`);
+          attendeeRow.appendChild(attendeeEvent);
+        });
+
+        table.appendChild(attendeeRow);
+      });
+
+      eventsDiv.appendChild(table);
+    }
+
+    renderEvents();
+  </script>
 </body>
 </html>
+
+
