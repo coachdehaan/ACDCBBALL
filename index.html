@@ -101,40 +101,41 @@ body {
   }
 
   function renderAttendeeList(eventIndex) {
-    const attendeeList = document.getElementById("attendee-list");
-    attendeeList.innerHTML = "";
+  const attendeeList = document.getElementById("attendee-list");
+  attendeeList.innerHTML = "";
 
-    const deadline = new Date(events[eventIndex].deadline);
-    const now = new Date();
+  const deadline = new Date(events[eventIndex].deadline);
+  const now = new Date();
 
-    attendees.forEach((attendee, attendeeIndex) => {
-      const attendeeDiv = document.createElement("div");
-      attendeeDiv.classList.add("attendee");
+  attendees.forEach((attendee, attendeeIndex) => {
+    const attendeeDiv = document.createElement("div");
+    attendeeDiv.classList.add("attendee");
 
-      const attendeeName = document.createElement("span");
-      attendeeName.classList.add("attendee-name");
-      attendeeName.textContent = attendee;
-      attendeeDiv.appendChild(attendeeName);
+    const attendeeName = document.createElement("span");
+    attendeeName.classList.add("attendee-name");
+    attendeeName.textContent = attendee;
+    attendeeDiv.appendChild(attendeeName);
 
-      const attendeeCheckbox = document.createElement("input");
-      attendeeCheckbox.type = "checkbox";
-      attendeeCheckbox.classList.add("attendee-checkbox");
-      attendeeCheckbox.addEventListener("change", (event) => {
-        updateAttendance(eventIndex, attendeeIndex, event.target.checked);
-      });
-      attendeeDiv.appendChild(attendeeCheckbox);
-
-      // Load saved attendance information from Firebase
-      const eventRef = database.ref(`events/${eventIndex}/${attendeeIndex}`);
-      eventRef.on("value", (snapshot) => {
-        attendeeCheckbox.checked = snapshot.val() || false;
-      });
-
-      attendeeCheckbox.disabled = now > deadline;
-
-      attendeeList.appendChild(attendeeDiv);
+    const attendeeCheckbox = document.createElement("input");
+    attendeeCheckbox.type = "checkbox";
+    attendeeCheckbox.classList.add("attendee-checkbox");
+    attendeeCheckbox.addEventListener("change", (event) => {
+      updateAttendance(eventIndex, attendeeIndex, event.target.checked);
     });
-  }
+    attendeeDiv.appendChild(attendeeCheckbox);
+
+    // Load saved attendance information from Firebase
+    const eventRef = database.ref(`events/${eventIndex}/${attendeeIndex}`);
+    eventRef.on("value", (snapshot) => {
+      attendeeCheckbox.checked = snapshot.val() || false;
+    });
+
+    attendeeCheckbox.disabled = now > deadline;
+
+    attendeeList.appendChild(attendeeDiv);
+  });
+}
+
 
   renderEventSelection();
 
