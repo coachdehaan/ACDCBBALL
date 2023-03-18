@@ -7,157 +7,121 @@
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
 <style>
-    table {
-      border-collapse: collapse;
-      width: 100%;
-    }
-    th, td {
-      border: 1px solid black;
-      padding: 8px;
-      text-align: left;
-    }
-    th {
-      background-color: #f2f2f2;
-    }
-    .sticky {
-      position: sticky;
-      top: 0;
-      background-color: white;
-      z-index: 1;
-    }
-    @media (max-width: 767px) {
-      table {
-        display: block;
-        position: relative;
-      }
-      thead, tbody, th, td, tr {
-        display: block;
-      }
-      thead tr {
-        position: fixed;
-        top: 0;
-        background-color: white;
-        width: 100%;
-        z-index: 1;
-      }
-      th {
-        display: inline-block;
-        width: 100%;
-      }
-      tbody {
-        margin-top: 2rem;
-      }
-      tr {
-        margin-bottom: 1rem;
-      }
-      td {
-        border: none;
-        position: relative;
-        display: inline-block;
-        width: 100%;
-      }
-      td:before {
-        content: attr(data-label);
-        position: absolute;
-        left: 0;
-        top: 50%;
-        transform: translateY(-50%);
-        font-weight: bold;
-        width: 45%;
-        overflow: hidden;
-        text-overflow: ellipsis;
-      }
-    }
+body {
+  font-family: Arial, sans-serif;
+}
+
+#event-selection {
+  margin-bottom: 1rem;
+}
+
+.attendee-list {
+  margin-bottom: 1rem;
+}
+
+.attendee {
+  display: flex;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.attendee-name {
+  width: 150px;
+  font-weight: bold;
+}
+
+.attendee-checkbox {
+  margin-left: 10px;
+}
+
 </style>
 </head>
 <body>
-  <div id="events"></div>
-  <script>
-    const firebaseConfig = {
-      apiKey: "AIzaSyCTVf7UuZYlMfiRRdF3aOZlipVgGwWntsM",
-      authDomain: "acdcboybasketball.firebaseapp.com",
-      databaseURL: "https://acdcboybasketball-default-rtdb.firebaseio.com",
-      projectId: "acdcboybasketball",
-      storageBucket: "acdcboybasketball.appspot.com",
-      messagingSenderId: "488795731492",
-      appId: "1:488795731492:web:4d20b1644c27f85388cab1"
-    };
+  <div id="event-selection"></div>
+  <div id="attendee-list"></div>
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyCTVf7UuZYlMfiRRdF3aOZlipVgGwWntsM",
+    authDomain: "acdcboybasketball.firebaseapp.com",
+    databaseURL: "https://acdcboybasketball-default-rtdb.firebaseio.com",
+    projectId: "acdcboybasketball",
+    storageBucket: "acdcboybasketball.appspot.com",
+    messagingSenderId: "488795731492",
+    appId: "1:488795731492:web:4d20b1644c27f85388cab1"
+  };
 
-    const firebaseApp = firebase.initializeApp(firebaseConfig);
-    const database = firebaseApp.database();
+  const firebaseApp = firebase.initializeApp(firebaseConfig);
+  const database = firebaseApp.database();
 
-    const events = [
-      { name: "U16 Spring Jam Sioux Falls", date: "April 22-23" },
-      { name: "USF Team Sioux Falls", date: "June 17-18" },
-      { name: "U16 Summer Classic Sioux Falls", date: "July 21-23" },
-      { name: "Hardknockers Rapid City", date: "July 28-29" }
-    ];
+  const events = [
+    { name: "U16 Spring Jam Sioux Falls", date: "April 22-23" },
+    { name: "USF Team Sioux Falls", date: "June 17-18" },
+    { name: "U16 Summer Classic Sioux Falls", date: "July 21-23" },
+    { name: "Hardknockers Rapid City", date: "July 28-29" }
+  ];
 
-        const attendees = [
-      "Sabas", "Hunter", "Anaias", "Peter", "Garth", "Ryder", "Tyson", "Jamian", "Ethan", "Isaiah", "AJ", "Ty", "Justin", "Koda", "Tate", "Kashton"
-    ];
+  const attendees = [
+    "Sabas", "Hunter", "Anaias", "Peter", "Garth", "Ryder", "Tyson", "Jamian", "Ethan", "Isaiah", "AJ", "Ty", "Justin", "Koda", "Tate", "Kashton"
+  ];
 
-    function updateAttendance(eventIndex, attendeeIndex, attending) {
-      const eventRef = database.ref(`events/${eventIndex}/${attendeeIndex}`);
-      eventRef.set(attending);
-    }
+  function updateAttendance(eventIndex, attendeeIndex, attending) {
+    const eventRef = database.ref(`events/${eventIndex}/${attendeeIndex}`);
+    eventRef.set(attending);
+  }
 
-    function renderEvents() {
-      const eventsDiv = document.getElementById("events");
-      eventsDiv.innerHTML = "";
+  function renderEventSelection() {
+    const eventSelection = document.getElementById("event-selection");
+    eventSelection.innerHTML = "";
 
-      const table = document.createElement("table");
-      const thead = document.createElement("thead");
-      const headerRow = document.createElement("tr");
-      const nameHeader = document.createElement("th");
-      nameHeader.textContent = "Name";
-      nameHeader.classList.add("sticky");
-      headerRow.appendChild(nameHeader);
+    const select = document.createElement("select");
+    select.addEventListener("change", () => {
+      renderAttendeeList(select.selectedIndex);
+    });
 
-      events.forEach((event) => {
-        const eventHeader = document.createElement("th");
-        eventHeader.textContent = `${event.name} (${event.date})`;
-        eventHeader.classList.add("sticky");
-        headerRow.appendChild(eventHeader);
+    const defaultOption = document.createElement("option");
+    defaultOption.textContent = "Select an event";
+    defaultOption.disabled = true;
+    defaultOption.selected = true;
+    select.appendChild(defaultOption);
+
+    events.forEach((event, index) => {
+      const option = document.createElement("option");
+      option.textContent = `${event.name} (${event.date})`;
+      option.value = index;
+      select.appendChild(option);
+    });
+
+    eventSelection.appendChild(select);
+  }
+
+  function renderAttendeeList(eventIndex) {
+    const attendeeList = document.getElementById("attendee-list");
+    attendeeList.innerHTML = "";
+
+    attendees.forEach((attendee, attendeeIndex) => {
+      const attendeeDiv = document.createElement("div");
+      attendeeDiv.classList.add("attendee");
+
+      const attendeeName = document.createElement("span");
+      attendeeName.classList.add("attendee-name");
+      attendeeName.textContent = attendee;
+      attendeeDiv.appendChild(attendeeName);
+
+      const attendeeCheckbox = document.createElement("input");
+      attendeeCheckbox.type = "checkbox";
+      attendeeCheckbox.classList.add("attendee-checkbox");
+      attendeeCheckbox.addEventListener("change", (event) => {
+        updateAttendance(eventIndex, attendeeIndex, event.target.checked);
       });
+      attendeeDiv.appendChild(attendeeCheckbox);
 
-      thead.appendChild(headerRow);
-      table.appendChild(thead);
+      attendeeList.appendChild(attendeeDiv);
+    });
+  }
 
-      attendees.forEach((attendee, attendeeIndex) => {
-        const attendeeRow = document.createElement("tr");
-        const attendeeName = document.createElement("td");
-        attendeeName.textContent = attendee;
-        attendeeName.setAttribute("data-label", "Name");
-        attendeeRow.appendChild(attendeeName);
+  renderEventSelection();
 
-        events.forEach((event, eventIndex) => {
-          const attendeeEvent = document.createElement("td");
-          const attendingCheckbox = document.createElement("input");
-          attendingCheckbox.type = "checkbox";
-          attendingCheckbox.addEventListener("change", () => {
-            updateAttendance(eventIndex, attendeeIndex, attendingCheckbox.checked);
-          });
-
-          const eventRef = database.ref(`events/${eventIndex}/${attendeeIndex}`);
-          eventRef.on("value", (snapshot) => {
-            attendingCheckbox.checked = snapshot.val() || false;
-          });
-
-          attendeeEvent.appendChild(attendingCheckbox);
-          attendeeEvent.setAttribute("data-label", `${event.name} (${event.date})`);
-          attendeeRow.appendChild(attendeeEvent);
-        });
-
-        table.appendChild(attendeeRow);
-      });
-
-      eventsDiv.appendChild(table);
-    }
-
-    renderEvents();
-  </script>
+</script>
 </body>
 </html>
-
 
