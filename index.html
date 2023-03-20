@@ -186,30 +186,29 @@
         });
 
    // Track the selected user
-let selectedUser = null;
-const userSelect = document.getElementById('user-select');
-userSelect.addEventListener('change', () => {
-  selectedUser = userSelect.value;
-  renderEventSelection();
-});
+    let selectedUser = null;
+     const userSelect = document.getElementById('user-select');
+     userSelect.addEventListener('change', () => {
+     selectedUser = userSelect.value;
+     renderEventSelection();
+     });
 
 // Render the event selection dropdown
-function renderEventSelection() {
-  const eventSelection = document.getElementById("event-selection");
-  eventSelection.innerHTML = "";
-
-  const select = document.createElement("select");
-  select.addEventListener("change", () => {
+     function renderEventSelection() {
+     const eventSelection = document.getElementById("event-selection");
+     eventSelection.innerHTML = "";
+     const select = document.createElement("select");
+     select.addEventListener("change", () => {
     renderAttendeeList(select.value);
-  });
+    });
 
-  const defaultOption = document.createElement("option");
-  defaultOption.textContent = "Select an event";
-  defaultOption.disabled = true;
-  defaultOption.selected = true;
-  select.appendChild(defaultOption);
+     const defaultOption = document.createElement("option");
+     defaultOption.textContent = "Select an event";
+     defaultOption.disabled = true;
+     defaultOption.selected = true;
+     select.appendChild(defaultOption);
 
-  events.forEach((event, eventIndex) => {
+     events.forEach((event, eventIndex) => {
     const option = document.createElement("option");
     option.textContent = `${event.name} - ${event.date}`;
     option.value = eventIndex;
@@ -268,3 +267,4 @@ function renderEventSelection() {
    });
   </script>
 </body>
+</html>
