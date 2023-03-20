@@ -6,152 +6,237 @@
   <title>Event Attendance</title>
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
-<style>
-body {
-  font-family: Arial, sans-serif; 
+  <script src="https://cdn.jsdelivr.net/npm/@openai/api@0.5.1"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+    }
 
-}
+    #event-selection {
+      margin-bottom: 1rem;
+    }
 
-#event-selection {
-  margin-bottom: 1rem;
-}
+    .attendee-list {
+      margin-bottom: 1rem;
+    }
 
-.attendee-list {
-  margin-bottom: 1rem;
-}
+    .attendee {
+      display: flex;
+      align-items: center;
+      margin-bottom: 0.5rem;
+    }
 
-.attendee {
-  display: flex;
-  align-items: center;
-  margin-bottom: 0.5rem;
-}
+    .attendee-name {
+      width: 150px;
+      font-weight: bold;
+    }
 
-.attendee-name {
-  width: 150px;
-  font-weight: bold;
-}
+    .attendee-checkbox {
+      margin-left: 10px;
+    }
 
-.attendee-checkbox {
-  margin-left: 10px;
-}
-h1 {
-  text-align: center;
-  font-size: calc(1rem + 2vw);
-  white-space: nowrap;
-  overflow: hidden;
-}
-
-</style>
+    h1 {
+      text-align: center;
+      font-size: calc(1rem + 2vw);
+      white-space: nowrap;
+      overflow: hidden;
+    }
+  </style>
 </head>
 <body>
   <h1>⚡ACDC BOYS BBALL⚡</h1>
 
+  <div id="user-selection">
+    <label for="user-dropdown">Select your name:</label>
+    <select id="user-dropdown">
+      <option value="" disabled selected>Select your name</option>
+      <option value="AJ">AJ</option>
+      <option value="Anaias">Anaias</option>
+      <option value="Peter">Peter</option>
+      <option value="Garth">Garth</option>
+      <option value="Ryder">Ryder</option>
+      <option value="Sabas">Sabas</option>
+      <option value="Hunter">Hunter</option>
+      <option value="Tyson">Tyson</option>
+      <option value="Tate">Tate</option>
+      <option value="Jamian">Jamian</option>
+      <option value="Ethan">Ethan</option>
+      <option value="Isaiah">Isaiah</option>
+      <option value="TyBo">TyBo</option>
+      <option value="Justin">Justin</option>
+      <option value="Koda">Koda</option>
+      <option value="Kashton">Kashton</option>
+      <option value="Ty">Ty</option>
+      <option value="Ephesian">Ephesian</option>
+      <option value="Others">Others?</option>
+    </select>
+  </div>
+
   <div id="event-selection"></div>
   <div id="attendee-list"></div>
-<script>
-  const firebaseConfig = {
-    apiKey: "AIzaSyCTVf7UuZYlMfiRRdF3aOZlipVgGwWntsM",
-    authDomain: "acdcboybasketball.firebaseapp.com",
-    databaseURL: "https://acdcboybasketball-default-rtdb.firebaseio.com",
-    projectId: "acdcboybasketball",
-    storageBucket: "acdcboybasketball.appspot.com",
-    messagingSenderId: "488795731492",
-    appId: "1:488795731492:web:4d20b1644c27f85388cab1"
-  };
 
-  const firebaseApp = firebase.initializeApp(firebaseConfig);
-  const database = firebaseApp.database();
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyCTVf7UuZYlMfiRRdF3aOZlipVgGwWntsM",
+  authDomain: "acdcboybasketball.firebaseapp.com",
+  databaseURL: "https://acdcboybasketball-default-rtdb.firebaseio.com",
+  projectId: "acdcboybasketball",
+  storageBucket: "acdcboybasketball.appspot.com",
+  messagingSenderId: "488795731492",
+  appId: "1:488795731492:web:4d20b1644c27f85388cab1"
+    };
 
-  const events = [
-    { name: "U16 Spring Jam Sioux Falls", date: "April 22-23" },
-    { name: "USF Team Sioux Falls", date: "June 17-18" },
-    { name: "U16 Summer Classic Sioux Falls", date: "July 21-23" },
-    { name: "Hardknockers Rapid City", date: "July 28-29" }
-  ];
+    firebase.initializeApp(firebaseConfig);
+    const database = firebase.database();
+    const openai = require('@openai/api');
+    openai.apiKey = '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';
 
-  const attendees = [
-    "AJ", "Anaias", "Peter", "Garth", "Ryder", "Sabas", "Hunter", "Tyson", "Tate", "Jamian", "Ethan", "Isaiah", "TyBo", "Justin", "Koda", "Kashton", "Ty", "Ephesian", "Others?"
-  ];
+    const events = [
+      { name: "DC Open GYM", date: "March 18, 10am" },
+      { name: "U16 Spring Jam Sioux Falls", date: "April 22-23" },
+      { name: "USF Team Sioux Falls", date: "June 17-18" },
+      { name: "U16 Summer Classic Sioux Falls", date: "July 21-23" },
+      { name: "Hardknockers Rapid City", date: "July 28-29" }
+    ];
 
-  function updateAttendance(eventIndex, attendeeIndex, attending) {
-    const eventRef = database.ref(`events/${eventIndex}/${attendeeIndex}`);
-    eventRef.set(attending);
-  }
+    const attendees = [
+      "AJ", "Anaias", "Peter", "Garth", "Ryder", "Sabas", "Hunter", "Tyson", "Tate", "Jamian", "Ethan", "Isaiah", "TyBo", "Justin", "Koda", "Kashton", "Ty", "Ephesian", "Others?"
+    ];
 
-  function renderEventSelection() {
-    const eventSelection = document.getElementById("event-selection");
-    eventSelection.innerHTML = "";
+    let currentUser = "";
 
-    const select = document.createElement("select");
-    select.addEventListener("change", () => {
-      renderAttendeeList(select.selectedIndex);
-    });
+    function updateAttendance(eventIndex, attendeeIndex, attending) {
+      const eventRef = database.ref(`events/${eventIndex}/${attendeeIndex}`);
+      eventRef.set(attending);
+    }
 
-    const defaultOption = document.createElement("option");
-    defaultOption
-    defaultOption.textContent = "Select an event";
-    defaultOption.disabled = true;
-    defaultOption.selected = true;
-    select.appendChild(defaultOption);
+    function renderEventSelection() {
+      const eventSelection = document.getElementById("event-selection");
+      eventSelection.innerHTML = "";
 
-    events.forEach((event, index) => {
-      const option = document.createElement("option");
-      option.textContent = `${event.name} (${event.date})`;
-      option.value = index;
-      select.appendChild(option);
-    });
+      const select = document.createElement("select");
+      select.addEventListener("change", () => {
+        renderAttendeeList(select.value);
+      });
 
-    eventSelection.appendChild(select);
-  }
+      const defaultOption = document.createElement("option");
+      defaultOption.textContent = "Select your name";
+      defaultOption.disabled = true;
+      defaultOption.selected = true;
+      select.appendChild(defaultOption);
 
-  function renderAttendeeList(eventIndex) {
-    const attendeeList = document.getElementById("attendee-list");
-    attendeeList.innerHTML = "";
+      attendees.forEach((attendee) => {
+        const option = document.createElement("option");
+        option.textContent = attendee;
+        option.value = attendee;
+        select.appendChild(option);
+      });
 
-    attendees.forEach((attendee, attendeeIndex) => {
-      const attendeeDiv = document.createElement("div");
-      attendeeDiv.classList.add("attendee");
+      eventSelection.appendChild(select);
+    }
 
-      const attendeeName = document.createElement("span");
-      attendeeName.classList.add("attendee-name");
-      attendeeName.textContent = attendee;
-      attendeeDiv.appendChild(attendeeName);
+    function renderAttendeeList(name) {
+      const attendeeList = document.getElementById("attendee-list");
+      attendeeList.innerHTML = "";
 
-      const attendeeCheckbox = document.createElement("input");
-      attendeeCheckbox.type = "checkbox";
-      attendeeCheckbox.classList.add("attendee-checkbox");
-      attendeeCheckbox.addEventListener("change", (event) => {
-        const currentCheckbox = event.target;
-        const currentChecked = currentCheckbox.checked;
-        if (currentChecked) {
-          attendees.forEach((name, index) => {
-            if (index !== attendeeIndex) {
-              const otherCheckbox = attendeeList.children[index].querySelector(".attendee-checkbox");
-              if (otherCheckbox.checked) {
-                alert("You can only check your own name!");
-                otherCheckbox.checked = false;
-                setTimeout(() => {
-                  otherCheckbox.checked = true;
-                }, 5000);
-              }
+      attendees.forEach((attendee, attendeeIndex) => {
+        const attendeeDiv = document.createElement("div");
+        attendeeDiv.classList.add("attendee");
+
+        const attendeeName = document.createElement("span");
+        attendeeName.classList.add("attendee-name");
+        attendeeName.textContent = attendee;
+        attendeeDiv.appendChild(attendeeName);
+
+        const attendeeCheckbox = document.createElement("input");
+        attendeeCheckbox.type = "checkbox";
+        attendeeCheckbox.classList.add("attendee-checkbox");
+        attendeeCheckbox.addEventListener("change", (event) => {
+          if (event.target.checked) {
+            if (attendee === currentUser) {
+              updateAttendance(eventIndex, attendeeIndex, true);
+            } else {
+              event.target.checked = false;
+              const prompt = `You can only select events for ${currentUser}. Please uncheck the checkbox and select your name from the dropdown to change users.`;
+              openai.completions.create({
+                engine: 'text-davinci-002',
+                prompt: prompt,
+                maxTokens: 64,
+                n: 1,
+                stop: '\n'
+              })
+              .then((response) => {
+                const message = response.choices[0].text.trim();
+                alert(message);
+              })
+              .catch((error) => {
+                console.error(error);
+              });
             }
+          } else {
+            updateAttendance(eventIndex, attendeeIndex, false);
+          }
+        });
+        attendeeDiv.appendChild(attendeeCheckbox);
+
+        // Load saved attendance information from Firebase
+        const eventRef = database.ref(`events/${eventIndex}/${attendeeIndex}`);
+        eventRef.on("value", (snapshot) => {
+          attendeeCheckbox.checked = snapshot.val() || false;
+        });
+
+   // Track the selected user
+   let selectedUser = null;
+   const userSelect = document.getElementById('user-select');
+   userSelect.addEventListener('change', () => {
+    selectedUser = userSelect.value;
+   });
+
+   // Track clicks on the attendee checkboxes
+    let clickCount = 0;
+   let lastClickTime = 0;
+   const attendeeCheckboxes = document.querySelectorAll('.attendee-checkbox');
+   attendeeCheckboxes.forEach((checkbox) => {
+    checkbox.addEventListener('click', () => {
+      const now = Date.now();
+      if (now - lastClickTime < 1000) { // Check if clicks are too close together
+        clickCount++;
+        if (clickCount >= 10) { // Check if too many clicks
+          const prompt = 'You are clicking too many checkboxes too quickly.';
+          openai.completions.create({
+            engine: 'text-davinci-002',
+            prompt: prompt,
+            maxTokens: 64,
+            n: 1,
+            stop: '\n'
+          })
+          .then((response) => {
+            const message = response.choices[0].text.trim();
+            alert(message);
+          })
+          .catch((error) => {
+            console.error(error);
           });
         }
-        updateAttendance(eventIndex, attendeeIndex, currentChecked);
-      });
-      attendeeDiv.appendChild(attendeeCheckbox);
+      } else {
+        clickCount = 0;
+      }
+      lastClickTime = now;
 
-      // Load saved attendance information from Firebase
+      // Check if the checkbox is for the selected user
+      const attendeeName = checkbox.dataset.attendeeName;
+      if (attendeeName !== selectedUser) {
+        checkbox.checked = false;
+        alert(`You cannot select checkboxes for ${attendeeName}.`);
+      }
+
+      // Update the attendance information in Firebase
+      const eventIndex = userSelect.selectedIndex;
+      const attendeeIndex = checkbox.dataset.attendeeIndex;
+      const attending = checkbox.checked;
       const eventRef = database.ref(`events/${eventIndex}/${attendeeIndex}`);
-      eventRef.on("value", (snapshot) => {
-        attendeeCheckbox.checked = snapshot.val() || false;
-      });
-
-      attendeeList.appendChild(attendeeDiv);
+      eventRef.set(attending);
     });
-  }
-
-  renderEventSelection();
-</script>
+   });
+  </script>
 </body>
-</html>
