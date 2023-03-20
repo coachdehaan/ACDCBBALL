@@ -63,7 +63,6 @@ h1 {
   const database = firebaseApp.database();
 
   const events = [
-//{ name: "DC Open GYM", date: "March 18, 10am" },
     { name: "U16 Spring Jam Sioux Falls", date: "April 22-23" },
     { name: "USF Team Sioux Falls", date: "June 17-18" },
     { name: "U16 Summer Classic Sioux Falls", date: "July 21-23" },
@@ -89,6 +88,7 @@ h1 {
     });
 
     const defaultOption = document.createElement("option");
+    defaultOption
     defaultOption.textContent = "Select an event";
     defaultOption.disabled = true;
     defaultOption.selected = true;
@@ -105,39 +105,53 @@ h1 {
   }
 
   function renderAttendeeList(eventIndex) {
-  const attendeeList = document.getElementById("attendee-list");
-  attendeeList.innerHTML = "";
+    const attendeeList = document.getElementById("attendee-list");
+    attendeeList.innerHTML = "";
 
-  attendees.forEach((attendee, attendeeIndex) => {
-    const attendeeDiv = document.createElement("div");
-    attendeeDiv.classList.add("attendee");
+    attendees.forEach((attendee, attendeeIndex) => {
+      const attendeeDiv = document.createElement("div");
+      attendeeDiv.classList.add("attendee");
 
-    const attendeeName = document.createElement("span");
-    attendeeName.classList.add("attendee-name");
-    attendeeName.textContent = attendee;
-    attendeeDiv.appendChild(attendeeName);
+      const attendeeName = document.createElement("span");
+      attendeeName.classList.add("attendee-name");
+      attendeeName.textContent = attendee;
+      attendeeDiv.appendChild(attendeeName);
 
-    const attendeeCheckbox = document.createElement("input");
-    attendeeCheckbox.type = "checkbox";
-    attendeeCheckbox.classList.add("attendee-checkbox");
-    attendeeCheckbox.addEventListener("change", (event) => {
-      updateAttendance(eventIndex, attendeeIndex, event.target.checked);
+      const attendeeCheckbox = document.createElement("input");
+      attendeeCheckbox.type = "checkbox";
+      attendeeCheckbox.classList.add("attendee-checkbox");
+      attendeeCheckbox.addEventListener("change", (event) => {
+        const currentCheckbox = event.target;
+        const currentChecked = currentCheckbox.checked;
+        if (currentChecked) {
+          attendees.forEach((name, index) => {
+            if (index !== attendeeIndex) {
+              const otherCheckbox = attendeeList.children[index].querySelector(".attendee-checkbox");
+              if (otherCheckbox.checked) {
+                alert("You can only check your own name!");
+                otherCheckbox.checked = false;
+                setTimeout(() => {
+                  otherCheckbox.checked = true;
+                }, 5000);
+              }
+            }
+          });
+        }
+        updateAttendance(eventIndex, attendeeIndex, currentChecked);
+      });
+      attendeeDiv.appendChild(attendeeCheckbox);
+
+      // Load saved attendance information from Firebase
+      const eventRef = database.ref(`events/${eventIndex}/${attendeeIndex}`);
+      eventRef.on("value", (snapshot) => {
+        attendeeCheckbox.checked = snapshot.val() || false;
+      });
+
+      attendeeList.appendChild(attendeeDiv);
     });
-    attendeeDiv.appendChild(attendeeCheckbox);
-
-    // Load saved attendance information from Firebase
-    const eventRef = database.ref(`events/${eventIndex}/${attendeeIndex}`);
-    eventRef.on("value", (snapshot) => {
-      attendeeCheckbox.checked = snapshot.val() || false;
-    });
-
-    attendeeList.appendChild(attendeeDiv);
-  });
-}
-
+  }
 
   renderEventSelection();
-
 </script>
 </body>
 </html>
