@@ -90,146 +90,73 @@
     const database = firebase.database();
     const openai = require('@openai/api');
     openai.apiKey = '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';
-
     const events = [
-      { name: "DC Open GYM", date: "March 18, 10am" },
-      { name: "U16 Spring Jam Sioux Falls", date: "April 22-23" },
-      { name: "USF Team Sioux Falls", date: "June 17-18" },
-      { name: "U16 Summer Classic Sioux Falls", date: "July 21-23" },
-      { name: "Hardknockers Rapid City", date: "July 28-29" }
-    ];
+  { name: "DC Open GYM", date: "March 18, 10am" },
+  { name: "U16 Spring Jam Sioux Falls", date: "April 22-23" },
+  { name: "USF Team Sioux Falls", date: "June 17-18" },
+  { name: "U16 Summer Classic Sioux Falls", date: "July 21-23" },
+  { name: "Hardknockers Rapid City", date: "July 28-29" }
+];
 
-    const attendees = [
-      "AJ", "Anaias", "Peter", "Garth", "Ryder", "Sabas", "Hunter", "Tyson", "Tate", "Jamian", "Ethan", "Isaiah", "TyBo", "Justin", "Koda", "Kashton", "Ty", "Ephesian", "Others?"
-    ];
+const attendees = [
+  "AJ", "Anaias", "Peter", "Garth", "Ryder", "Sabas", "Hunter", "Tyson", "Tate", "Jamian", "Ethan", "Isaiah", "TyBo", "Justin", "Koda", "Kashton", "Ty", "Ephesian", "Others?"
+];
 
-    let currentUser = "";
+let currentUser = "";
 
-    function updateAttendance(eventIndex, attendeeIndex, attending) {
-      const eventRef = database.ref(`events/${eventIndex}/${attendeeIndex}`);
-      eventRef.set(attending);
-    }
+function updateAttendance(eventIndex, attendeeIndex, attending) {
+  const eventRef = database.ref(`events/${eventIndex}/${attendeeIndex}`);
+  eventRef.set(attending);
+}
 
-    function renderEventSelection() {
-      const eventSelection = document.getElementById("event-selection");
-      eventSelection.innerHTML = "";
+function renderEventSelection() {
+  const eventSelection = document.getElementById("event-selection");
+  eventSelection.innerHTML = "";
 
-      const select = document.createElement("select");
-      select.addEventListener("change", () => {
-        renderAttendeeList(select.value);
-      });
-
-      const defaultOption = document.createElement("option");
-      defaultOption.textContent = "Select your name";
-      defaultOption.disabled = true;
-      defaultOption.selected = true;
-      select.appendChild(defaultOption);
-
-      attendees.forEach((attendee) => {
-        const option = document.createElement("option");
-        option.textContent = attendee;
-        option.value = attendee;
-        select.appendChild(option);
-      });
-
-      eventSelection.appendChild(select);
-    }
-
-    function renderAttendeeList(name) {
-      const attendeeList = document.getElementById("attendee-list");
-      attendeeList.innerHTML = "";
-
-      attendees.forEach((attendee, attendeeIndex) => {
-        const attendeeDiv = document.createElement("div");
-        attendeeDiv.classList.add("attendee");
-
-        const attendeeName = document.createElement("span");
-        attendeeName.classList.add("attendee-name");
-        attendeeName.textContent = attendee;
-        attendeeDiv.appendChild(attendeeName);
-
-        const attendeeCheckbox = document.createElement("input");
-        attendeeCheckbox.type = "checkbox";
-        attendeeCheckbox.classList.add("attendee-checkbox");
-        attendeeCheckbox.addEventListener("change", (event) => {
-          if (event.target.checked) {
-            if (attendee === currentUser) {
-              updateAttendance(eventIndex, attendeeIndex, true);
-            } else {
-              event.target.checked = false;
-              const prompt = `You can only select events for ${currentUser}. Please uncheck the checkbox and select your name from the dropdown to change users.`;
-              openai.completions.create({
-                engine: 'text-davinci-002',
-                prompt: prompt,
-                maxTokens: 64,
-                n: 1,
-                stop: '\n'
-              })
-              .then((response) => {
-                const message = response.choices[0].text.trim();
-                alert(message);
-              })
-              .catch((error) => {
-                console.error(error);
-              });
-            }
-          } else {
-            updateAttendance(eventIndex, attendeeIndex, false);
-          }
-        });
-        attendeeDiv.appendChild(attendeeCheckbox);
-
-        // Load saved attendance information from Firebase
-        const eventRef = database.ref(`events/${eventIndex}/${attendeeIndex}`);
-        eventRef.on("value", (snapshot) => {
-          attendeeCheckbox.checked = snapshot.val() || false;
-        });
-
-   // Track the selected user
-    let selectedUser = null;
-     const userSelect = document.getElementById('user-select');
-     userSelect.addEventListener('change', () => {
-     selectedUser = userSelect.value;
-     renderEventSelection();
-     });
-
-// Render the event selection dropdown
-     function renderEventSelection() {
-     const eventSelection = document.getElementById("event-selection");
-     eventSelection.innerHTML = "";
-     const select = document.createElement("select");
-     select.addEventListener("change", () => {
+  const select = document.createElement("select");
+  select.addEventListener("change", () => {
     renderAttendeeList(select.value);
-    });
+  });
 
-     const defaultOption = document.createElement("option");
-     defaultOption.textContent = "Select an event";
-     defaultOption.disabled = true;
-     defaultOption.selected = true;
-     select.appendChild(defaultOption);
+  const defaultOption = document.createElement("option");
+  defaultOption.textContent = "Select your name";
+  defaultOption.disabled = true;
+  defaultOption.selected = true;
+  select.appendChild(defaultOption);
 
-     events.forEach((event, eventIndex) => {
+  attendees.forEach((attendee) => {
     const option = document.createElement("option");
-    option.textContent = `${event.name} - ${event.date}`;
-    option.value = eventIndex;
+    option.textContent = attendee;
+    option.value = attendee;
     select.appendChild(option);
   });
 
   eventSelection.appendChild(select);
 }
 
+function renderAttendeeList(name) {
+  const attendeeList = document.getElementById("attendee-list");
+  attendeeList.innerHTML = "";
 
-   // Track clicks on the attendee checkboxes
-    let clickCount = 0;
-   let lastClickTime = 0;
-   const attendeeCheckboxes = document.querySelectorAll('.attendee-checkbox');
-   attendeeCheckboxes.forEach((checkbox) => {
-    checkbox.addEventListener('click', () => {
-      const now = Date.now();
-      if (now - lastClickTime < 1000) { // Check if clicks are too close together
-        clickCount++;
-        if (clickCount >= 10) { // Check if too many clicks
-          const prompt = 'You are clicking too many checkboxes too quickly.';
+  attendees.forEach((attendee, attendeeIndex) => {
+    const attendeeDiv = document.createElement("div");
+    attendeeDiv.classList.add("attendee");
+
+    const attendeeName = document.createElement("span");
+    attendeeName.classList.add("attendee-name");
+    attendeeName.textContent = attendee;
+    attendeeDiv.appendChild(attendeeName);
+
+    const attendeeCheckbox = document.createElement("input");
+    attendeeCheckbox.type = "checkbox";
+    attendeeCheckbox.classList.add("attendee-checkbox");
+    attendeeCheckbox.addEventListener("change", (event) => {
+      if (event.target.checked) {
+        if (attendee === currentUser) {
+          updateAttendance(eventIndex, attendeeIndex, true);
+        } else {
+          event.target.checked = false;
+          const prompt = `You can only select events for ${currentUser}. Please uncheck the checkbox and select your name from the dropdown to change users.`;
           openai.completions.create({
             engine: 'text-davinci-002',
             prompt: prompt,
@@ -241,30 +168,36 @@
             const message = response.choices[0].text.trim();
             alert(message);
           })
+
+
           .catch((error) => {
             console.error(error);
           });
-        }
-      } else {
-        clickCount = 0;
-      }
-      lastClickTime = now;
+      });
+      attendeeDiv.appendChild(attendeeCheckbox);
+      attendeeList.appendChild(attendeeDiv);
 
-      // Check if the checkbox is for the selected user
-      const attendeeName = checkbox.dataset.attendeeName;
-      if (attendeeName !== selectedUser) {
-        checkbox.checked = false;
-        alert(`You cannot select checkboxes for ${attendeeName}.`);
-      }
-
-      // Update the attendance information in Firebase
-      const eventIndex = userSelect.selectedIndex;
-      const attendeeIndex = checkbox.dataset.attendeeIndex;
-      const attending = checkbox.checked;
+      // Load saved attendance information from Firebase
       const eventRef = database.ref(`events/${eventIndex}/${attendeeIndex}`);
-      eventRef.set(attending);
+      eventRef.on("value", (snapshot) => {
+        attendeeCheckbox.checked = snapshot.val() || false;
+      });
     });
-   });
+
+    const userSelect = document.getElementById("user-select");
+    userSelect.addEventListener("change", () => {
+      currentUser = userSelect.value;
+      renderEventSelection();
+    });
+
+    function init() {
+      renderEventSelection();
+    }
+
+    window.addEventListener("load", init);
   </script>
 </body>
-</html>
+
+</html>         
+</body>
+</html>  
