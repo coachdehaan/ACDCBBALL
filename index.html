@@ -125,11 +125,11 @@ h1 {
     });
     attendeeDiv.appendChild(attendeeCheckbox);
     for (let i = 1; i <= 6; i++) {
-  const attendeeButton = document.createElement("button");
-  attendeeButton.classList.add("attendee-button");
-  attendeeButton.textContent = `Button ${i}`;
-  attendeeDiv.appendChild(attendeeButton);
-}
+      const additionalCheckbox = document.createElement("input");
+      additionalCheckbox.type = "checkbox";
+      additionalCheckbox.classList.add("attendee-checkbox-additional");
+      attendeeDiv.appendChild(additionalCheckbox);
+    }
     // Load saved attendance information from Firebase
     const eventRef = database.ref(`events/${eventIndex}/${attendeeIndex}`);
     eventRef.on("value", (snapshot) => {
